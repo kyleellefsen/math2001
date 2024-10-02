@@ -113,33 +113,69 @@ example {x y : ℤ} (h : x ∣ y) : x ∣ 3 * y - 4 * y ^ 2 := by
 
 
 -- I can't use calc mode inside conv mode, even though it would be very convenient.
--- It simplifies the proof above a lot
-example {x y : ℤ} (h : x ∣ y) : x ∣ 3 * y - 4 * y ^ 2 := by
-  obtain ⟨k, hk⟩ := h
-  rw [hk]
-  dsimp [·∣·]
-  conv in (3 * (x * k) - 4 * (x * k) ^ 2) =>
-    calc
-      3 * (x * k) - 4 * (x * k) ^ 2
-        = x * 3 * k - x ^ 2 * 4 * k^2 := by ring
-      _ = x * (3 * k - x * 4 * k^2) := by ring
-  use 3 * k - x * 4 * k^2
-  rfl
+-- This works with more recent version of lean.
+-- example {x y : ℤ} (h : x ∣ y) : x ∣ 3 * y - 4 * y ^ 2 := by
+--   obtain ⟨k, hk⟩ := h
+--   rw [hk]
+--   dsimp [·∣·]
+--   conv in (3 * (x * k) - 4 * (x * k) ^ 2) =>
+--     calc
+--       3 * (x * k) - 4 * (x * k) ^ 2
+--         = x * 3 * k - x ^ 2 * 4 * k^2 := by ring
+--       _ = x * (3 * k - x * 4 * k^2) := by ring
+--   use 3 * k - x * 4 * k^2
+--   rfl
 
 example {m n : ℤ} (h : m ∣ n) : m ∣ 2 * n ^ 3 + n := by
-  sorry
+  obtain ⟨k, hk⟩ := h
+  rw [hk]
+  ring_nf
+  use k + m ^ 2 * k ^ 3 * 2
+  ring
 
 example {a b : ℤ} (hab : a ∣ b) : a ∣ 2 * b ^ 3 - b ^ 2 + 3 * b := by
-  sorry
+  obtain ⟨k, hk⟩ := hab
+  rw [hk]
+  use 2 * (a^2 * k^3) - (a * k^2) + 3 * k
+  ring
 
 example {k l m : ℤ} (h1 : k ∣ l) (h2 : l ^ 3 ∣ m) : k ^ 3 ∣ m := by
-  sorry
+  obtain ⟨j, hj⟩ := h1
+  rw [hj] at h2
+  obtain ⟨a, ha⟩ := h2
+  rw [ha]
+  rw [show (k * j) ^ 3 * a = k^3 * (j^3 *a) by ring]
+  use j^3 * a
+  rfl
 
 example {p q r : ℤ} (hpq : p ^ 3 ∣ q) (hqr : q ^ 2 ∣ r) : p ^ 6 ∣ r := by
-  sorry
+  obtain ⟨k, hk⟩ := hpq
+  obtain ⟨j, hj⟩ := hqr
+  rw [hk] at hj
+  use j * k ^2
+  calc
+    r = (p ^ 3 * k) ^ 2 * j := hj
+    _ = p ^ 6 * (j * k ^ 2) := by ring
 
+#eval (List.range 100).filter (9 ∣ 2 ^ · - 1)
 example : ∃ n : ℕ, 0 < n ∧ 9 ∣ 2 ^ n - 1 := by
-  sorry
+  use 6
+  constructor
+  . numbers
+  . use 7
+    ring_nf
+
+
+
+
 
 example : ∃ a b : ℤ, 0 < b ∧ b < a ∧ a - b ∣ a + b := by
-  sorry
+  use 2
+  use 1
+  constructor
+  . numbers
+  . constructor
+    . numbers
+    . ring_nf
+      use 3
+      ring_nf
