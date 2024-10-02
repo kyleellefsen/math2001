@@ -1,5 +1,6 @@
 /- Copyright (c) Heather Macbeth, 2023.  All rights reserved. -/
 import Mathlib.Data.Real.Basic
+import Mathlib.Algebra.Group.Defs
 import Library.Basic
 import Library.Tactic.ModEq
 
@@ -22,14 +23,43 @@ example (n : ℕ) : 2 ^ n ≥ n + 1 := by
 example (n : ℕ) : Even n ∨ Odd n := by
   simple_induction n with k IH
   · -- base case
-    sorry
+    left
+    dsimp [Even]
+    use 0
+    ring
   · -- inductive step
     obtain ⟨x, hx⟩ | ⟨x, hx⟩ := IH
-    · sorry
-    · sorry
+    · right
+      dsimp [Odd]
+      use x
+      rw [← hx]
+    · left
+      dsimp [Even]
+      use x +1
+      rw [hx]
+      ring
+
 
 example {a b d : ℤ} (h : a ≡ b [ZMOD d]) (n : ℕ) : a ^ n ≡ b ^ n [ZMOD d] := by
-  sorry
+  simple_induction n with k IH
+  · dsimp [Int.ModEq] at *
+    obtain ⟨x, hx⟩ := h
+    use 0
+    ring
+  · obtain ⟨x , hx⟩ := IH
+    obtain ⟨y, hy⟩ := h
+    have h2 := by calc
+      a ^ (k + 1) - b ^ (k + 1) = a * (a^k - b^k) + b^k * (a - b) := by ring
+      _ = a * (d*x) + b^k * (d * y) := by rw [hx, hy]
+      _ = d * (a * x + b^k * y) := by ring
+    use (a * x + b^k * y)
+    apply h2
+
+
+
+
+
+
 
 example (n : ℕ) : 4 ^ n ≡ 1 [ZMOD 15] ∨ 4 ^ n ≡ 4 [ZMOD 15] := by
   simple_induction n with k IH

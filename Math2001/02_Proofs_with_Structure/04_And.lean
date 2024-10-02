@@ -20,7 +20,11 @@ example {p : ℚ} (hp : p ^ 2 ≤ 8) : p ≥ -5 := by
       p ^ 2 ≤ 9 := by addarith [hp]
       _ = 3 ^ 2 := by numbers
     numbers
-  sorry
+  have ⟨lb, up⟩ := hp'
+  calc
+    p ≥ -3 := by addarith [lb]
+    _ ≥ -5 := by numbers
+
 
 example {a b : ℝ} (h1 : a - 5 * b = 4) (h2 : b + 2 = 3) : a = 9 ∧ b = 1 := by
   constructor
@@ -49,16 +53,37 @@ example {a b : ℝ} (h1 : a ^ 2 + b ^ 2 = 0) : a = 0 ∧ b = 0 := by
       a ^ 2 ≤ a ^ 2 + b ^ 2 := by extra
       _ = 0 := by rw [h1]
     extra
-  sorry
+  have h3 : b ^ 2 = 0 := by
+    calc
+      b ^ 2 = 0 + b^2 := by ring
+      _ = a ^ 2 + b ^ 2 := by rw [h2]
+      _ = 0 := by rw [h1]
+  constructor
+  apply sq_eq_zero_iff.mp h2
+  apply sq_eq_zero_iff.mp h3
+
+
+
 
 /-! # Exercises -/
 
 
 example {a b : ℚ} (H : a ≤ 1 ∧ a + b ≤ 3) : 2 * a + b ≤ 4 := by
-  sorry
+  obtain ⟨h1, h2⟩ := H
+  have h3 := add_le_add h1 h2
+  calc
+    2 * a + b = a + (a + b) := by ring
+    _ ≤ 1 + 3 := h3
+    _ = 4 := by ring
 
 example {r s : ℝ} (H : r + s ≤ 1 ∧ r - s ≤ 5) : 2 * r ≤ 6 := by
-  sorry
+  obtain ⟨h1, h2⟩ := H
+  have h3 := add_le_add h1 h2
+  calc
+    2 * r = r + s + (r - s) := by ring
+    _ ≤ 1 + 5 := h3
+    _ = 6 := by ring
+
 
 example {m n : ℤ} (H : n ≤ 8 ∧ m + 5 ≤ n) : m ≤ 3 := by
   sorry

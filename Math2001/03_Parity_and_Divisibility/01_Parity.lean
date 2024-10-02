@@ -13,7 +13,9 @@ example : Odd (7 : ℤ) := by
 
 
 example : Odd (-3 : ℤ) := by
-  sorry
+  dsimp [Odd]
+  use -2
+  ring
 
 example {n : ℤ} (hn : Odd n) : Odd (3 * n + 2) := by
   dsimp [Odd] at *
@@ -25,8 +27,14 @@ example {n : ℤ} (hn : Odd n) : Odd (3 * n + 2) := by
 
 
 example {n : ℤ} (hn : Odd n) : Odd (7 * n - 4) := by
-  sorry
+  obtain ⟨k, hk⟩ := hn
+  dsimp [Odd]
+  use 7 * k + 1
+  calc
+    7 * n - 4 = 7 * (2 * k + 1) - 4 := by rw [hk]
+    _ = 2 * (7 * k + 1) + 1 := by ring
 
+-- 3.1.5
 example {x y : ℤ} (hx : Odd x) (hy : Odd y) : Odd (x + y + 1) := by
   obtain ⟨a, ha⟩ := hx
   obtain ⟨b, hb⟩ := hy
@@ -37,13 +45,43 @@ example {x y : ℤ} (hx : Odd x) (hy : Odd y) : Odd (x + y + 1) := by
 
 
 example {x y : ℤ} (hx : Odd x) (hy : Odd y) : Odd (x * y + 2 * y) := by
-  sorry
+  obtain ⟨a, ha⟩ := hx
+  obtain ⟨b, hb⟩ := hy
+  dsimp [Odd]
+  conv in (x * y + 2 * y) =>
+    rw [hb]
+    rw [ha]
+  ring_nf
+  conv in (3) =>
+    rw [show (3 : ℤ) = 1 + 2 by rfl]
+  conv in   (1 + 2 + a * 2 + a * b * 4 + b * 6) =>
+    rw [show 1 + 2 + a * 2 + a * b * 4 + b * 6 = 1 + 2 * (1 + a * 1 + a * b * 2 + b * 3) by ring]
+  use 1 + a * 1 + a * b * 2 + b * 3
 
+
+-- 3.1.7
 example {m : ℤ} (hm : Odd m) : Even (3 * m - 5) := by
-  sorry
+  obtain ⟨a, ha⟩ := hm
+  dsimp [Even]
+  rw [ha]
+  ring_nf
+  conv in (-2 + a * 6) =>
+    rw [show -2 + a * 6 = (-1 + a * 3) *2 by ring]
+  use -1 + a * 3
+  rfl
 
+-- 3.1.8
 example {n : ℤ} (hn : Even n) : Odd (n ^ 2 + 2 * n - 5) := by
-  sorry
+  obtain ⟨a, ha⟩ := hn
+  have h1 :=
+    calc
+      n ^ 2 + 2 * n - 5 = _ := by rfl
+      _ = (2 * a) ^ 2 + 2 * (2 * a) - 5 := by rw [ha]
+      _ = 2 * (2 * a ^ 2 + 2 * a - 3) + 1 := by ring
+  dsimp [Odd]
+  use 2 * a ^ 2 + 2 * a - 3
+  apply h1
+
 
 example (n : ℤ) : Even (n ^ 2 + n + 4) := by
   obtain hn | hn := Int.even_or_odd n
@@ -62,16 +100,32 @@ example (n : ℤ) : Even (n ^ 2 + n + 4) := by
 
 
 example : Odd (-9 : ℤ) := by
-  sorry
+  use -5
+  ring
+
 
 example : Even (26 : ℤ) := by
-  sorry
+  use 13
+  ring
 
 example {m n : ℤ} (hm : Odd m) (hn : Even n) : Odd (n + m) := by
-  sorry
+  obtain ⟨a, ha⟩ := hm
+  obtain ⟨b, hb⟩ := hn
+  conv in (n + m) =>
+    rw [ha, hb]
+    rw [show 2 * b + (2 * a + 1) = 2 * (a + b) + 1 by ring]
+  use (a + b)
+  rfl
 
 example {p q : ℤ} (hp : Odd p) (hq : Even q) : Odd (p - q - 4) := by
-  sorry
+  obtain ⟨a, ha⟩ := hp
+  obtain ⟨b, hb⟩ := hq
+  conv in (p - q - 4) =>
+    rw [ha, hb]
+    rw [show 2 * a + 1 - 2 * b - 4 = 2 * (a - b - 2) + 1 by ring]
+  use a - b - 2
+  rfl
+
 
 example {a b : ℤ} (ha : Even a) (hb : Odd b) : Even (3 * a + b - 3) := by
   sorry
